@@ -164,11 +164,11 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
 
   ip_addr_t dns;
   if (uint32_t(manual_ip->dns1) != 0) {
-    dns.addr = static_cast<uint32_t>(manual_ip->dns1);
+    ip_addr_set_ip4_u32_val(dns, static_cast<uint32_t>(manual_ip->dns1));
     dns_setserver(0, &dns);
   }
   if (uint32_t(manual_ip->dns2) != 0) {
-    dns.addr = static_cast<uint32_t>(manual_ip->dns2);
+    ip_addr_set_ip4_u32_val(dns, static_cast<uint32_t>(manual_ip->dns2));
     dns_setserver(1, &dns);
   }
 
