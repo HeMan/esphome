@@ -14,6 +14,7 @@ from esphome.const import (
     CONF_GATEWAY,
     CONF_HIDDEN,
     CONF_ID,
+    CONF_IPV6,
     CONF_MANUAL_IP,
     CONF_NETWORKS,
     CONF_PASSWORD,
