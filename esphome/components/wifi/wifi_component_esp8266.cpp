@@ -325,6 +325,18 @@ bool WiFiComponent::wifi_sta_connect_(const WiFiAP &ap) {
     return false;
   }
 
+#ifdef PIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY
+  for (bool configured = false; !configured;) {
+    for (auto addr : addrList) {
+      ESP_LOGV(TAG, "Adress %s", addr.toString().c_str());
+      if ((configured = !addr.isLocal() && addr.isV6())) {
+        break;
+      }
+    }
+    delay(500);
+  }
+#endif
+
   if (ap.get_channel().has_value()) {
     ret = wifi_set_channel(*ap.get_channel());
     if (!ret) {
