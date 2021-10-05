@@ -325,7 +325,7 @@ bool WiFiComponent::wifi_sta_connect_(const WiFiAP &ap) {
     return false;
   }
 
-#ifdef PIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY
+#ifdef IPV6_ENABLE
   for (bool configured = false; !configured;) {
     for (auto addr : addrList) {
       ESP_LOGV(TAG, "Adress %s", addr.toString().c_str());
