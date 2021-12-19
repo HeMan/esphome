@@ -333,7 +333,7 @@ bool WiFiComponent::wifi_sta_connect_(const WiFiAP &ap) {
         break;
       }
     }
-    delay(500);
+    delay(500); // NOLINT
   }
 #endif
 
