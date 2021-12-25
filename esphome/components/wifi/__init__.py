@@ -10,6 +10,7 @@ from esphome.const import (
     CONF_DNS1,
     CONF_DNS2,
     CONF_DOMAIN,
+    CONF_ENABLE_IPV6,
     CONF_FAST_CONNECT,
     CONF_GATEWAY,
     CONF_HIDDEN,
@@ -253,6 +254,7 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_MANUAL_IP): STA_MANUAL_IP_SCHEMA,
             cv.Optional(CONF_EAP): EAP_AUTH_SCHEMA,
             cv.Optional(CONF_AP): WIFI_NETWORK_AP,
+            cv.Optional(CONF_ENABLE_IPV6): cv.boolean,
             cv.Optional(CONF_DOMAIN, default=".local"): cv.domain_name,
             cv.Optional(
                 CONF_REBOOT_TIMEOUT, default="15min"
@@ -348,6 +350,11 @@ async def to_code(config):
     for network in config.get(CONF_NETWORKS, []):
         ip_config = network.get(CONF_MANUAL_IP, config.get(CONF_MANUAL_IP))
         cg.add(var.add_sta(wifi_network(network, ip_config)))
+
+    if CONF_ENABLE_IPV6 in config and config[CONF_ENABLE_IPV6]:
+        cg.add_build_flag("-DIPV6_ENABLE -DCONFIG_LWIP_IPV6 -DCONFIG_LWIP_IPV6_AUTOCONFIG")
+        if CORE.is_esp8266:
+            cg.add_build_flag("-DPIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY")
 
     if CONF_AP in config:
         conf = config[CONF_AP]
