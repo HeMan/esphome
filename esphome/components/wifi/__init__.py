@@ -352,7 +352,9 @@ async def to_code(config):
         cg.add(var.add_sta(wifi_network(network, ip_config)))
 
     if CONF_ENABLE_IPV6 in config and config[CONF_ENABLE_IPV6]:
-        cg.add_build_flag("-DIPV6_ENABLE -DCONFIG_LWIP_IPV6 -DCONFIG_LWIP_IPV6_AUTOCONFIG")
+        cg.add_build_flag(
+            "-DIPV6_ENABLE -DCONFIG_LWIP_IPV6 -DCONFIG_LWIP_IPV6_AUTOCONFIG"
+        )
         if CORE.is_esp8266:
             cg.add_build_flag("-DPIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY")
 
