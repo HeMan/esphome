@@ -593,7 +593,7 @@ class LWIPRawImpl : public Socket {
 };
 
 std::unique_ptr<Socket> socket(int domain, int type, int protocol) {
-  auto *pcb = tcp_new();
+  auto *pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
   if (pcb == nullptr)
     return nullptr;
   auto *sock = new LWIPRawImpl((sa_family_t) domain, pcb);  // NOLINT(cppcoreguidelines-owning-memory)
