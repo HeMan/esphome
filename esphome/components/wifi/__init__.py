@@ -254,7 +254,9 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_MANUAL_IP): STA_MANUAL_IP_SCHEMA,
             cv.Optional(CONF_EAP): EAP_AUTH_SCHEMA,
             cv.Optional(CONF_AP): WIFI_NETWORK_AP,
-            cv.Optional(CONF_ENABLE_IPV6): cv.boolean,
+            cv.SplitDefault(CONF_ENABLE_IPV6, esp32_idf=False): cv.All(
+                cv.only_with_esp_idf, cv.boolean
+            ),
             cv.Optional(CONF_DOMAIN, default=".local"): cv.domain_name,
             cv.Optional(
                 CONF_REBOOT_TIMEOUT, default="15min"
@@ -355,8 +357,6 @@ async def to_code(config):
         cg.add_build_flag(
             "-DIPV6_ENABLE -DCONFIG_LWIP_IPV6 -DCONFIG_LWIP_IPV6_AUTOCONFIG"
         )
-        if CORE.is_esp8266:
-            cg.add_build_flag("-DPIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY")
 
     if CONF_AP in config:
         conf = config[CONF_AP]
