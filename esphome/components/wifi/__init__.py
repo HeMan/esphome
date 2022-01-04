@@ -33,6 +33,7 @@ from esphome.const import (
     CONF_EAP,
 )
 from esphome.core import CORE, HexInt, coroutine_with_priority
+from esphome.components.esp32 import add_idf_sdkconfig_option
 from esphome.components.network import IPAddress
 from . import wpa2_eap
 
@@ -354,9 +355,9 @@ async def to_code(config):
         cg.add(var.add_sta(wifi_network(network, ip_config)))
 
     if CONF_ENABLE_IPV6 in config and config[CONF_ENABLE_IPV6]:
-        cg.add_build_flag(
-            "-DIPV6_ENABLE -DCONFIG_LWIP_IPV6 -DCONFIG_LWIP_IPV6_AUTOCONFIG"
-        )
+        add_idf_sdkconfig_option("CONFIG_LWIP_IPV6", True)
+        add_idf_sdkconfig_option("CONFIG_LWIP_IPV6_AUTOCONFIG", True)
+        cg.add_define("IPV6_ENABLE")
 
     if CONF_AP in config:
         conf = config[CONF_AP]
