@@ -357,7 +357,6 @@ async def to_code(config):
     if CONF_ENABLE_IPV6 in config and config[CONF_ENABLE_IPV6]:
         add_idf_sdkconfig_option("CONFIG_LWIP_IPV6", True)
         add_idf_sdkconfig_option("CONFIG_LWIP_IPV6_AUTOCONFIG", True)
-        cg.add_define("IPV6_ENABLE")
 
     if CONF_AP in config:
         conf = config[CONF_AP]

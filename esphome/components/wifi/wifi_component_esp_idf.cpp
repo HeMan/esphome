@@ -643,9 +643,7 @@ void WiFiComponent::wifi_process_event_(IDFWiFiEvent *data) {
 
   } else if (data->event_base == IP_EVENT && data->event_id == IP_EVENT_STA_GOT_IP) {
     const auto &it = data->data.ip_got_ip;
-#ifdef IPV6_ENABLE
     tcpip_adapter_create_ip6_linklocal(TCPIP_ADAPTER_IF_STA);
-#endif
     ESP_LOGV(TAG, "Event: Got IP static_ip=%s gateway=%s", format_ip4_addr(it.ip_info.ip).c_str(),
              format_ip4_addr(it.ip_info.gw).c_str());
     s_sta_got_ip = true;
