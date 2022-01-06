@@ -10,7 +10,6 @@ from esphome.const import (
     CONF_DNS1,
     CONF_DNS2,
     CONF_DOMAIN,
-    CONF_ENABLE_IPV6,
     CONF_FAST_CONNECT,
     CONF_GATEWAY,
     CONF_HIDDEN,
@@ -33,7 +32,6 @@ from esphome.const import (
     CONF_EAP,
 )
 from esphome.core import CORE, HexInt, coroutine_with_priority
-from esphome.components.esp32 import add_idf_sdkconfig_option
 from esphome.components.network import IPAddress
 from . import wpa2_eap
 
@@ -255,9 +253,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_MANUAL_IP): STA_MANUAL_IP_SCHEMA,
             cv.Optional(CONF_EAP): EAP_AUTH_SCHEMA,
             cv.Optional(CONF_AP): WIFI_NETWORK_AP,
-            cv.SplitDefault(CONF_ENABLE_IPV6, esp32_idf=False): cv.All(
-                cv.only_with_esp_idf, cv.boolean
-            ),
             cv.Optional(CONF_DOMAIN, default=".local"): cv.domain_name,
             cv.Optional(
                 CONF_REBOOT_TIMEOUT, default="15min"
@@ -353,10 +348,6 @@ async def to_code(config):
     for network in config.get(CONF_NETWORKS, []):
         ip_config = network.get(CONF_MANUAL_IP, config.get(CONF_MANUAL_IP))
         cg.add(var.add_sta(wifi_network(network, ip_config)))
-
-    if CONF_ENABLE_IPV6 in config and config[CONF_ENABLE_IPV6]:
-        add_idf_sdkconfig_option("CONFIG_LWIP_IPV6", True)
-        add_idf_sdkconfig_option("CONFIG_LWIP_IPV6_AUTOCONFIG", True)
 
     if CONF_AP in config:
         conf = config[CONF_AP]
