@@ -7,9 +7,6 @@
 #include "esphome/core/helpers.h"
 #include "esphome/components/network/ip_address.h"
 #include <string>
-#ifdef PIO_FRAMEWORK_ARDUINO_LWIP2_IPV6_LOW_MEMORY
-#include <AddrList.h>
-#endif
 
 #ifdef USE_ESP32_FRAMEWORK_ARDUINO
 #include <esp_wifi.h>

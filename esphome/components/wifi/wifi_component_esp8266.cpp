@@ -19,6 +19,7 @@ extern "C" {
 #include "lwip/apps/sntp.h"
 #if LWIP_IPV6
 #include "lwip/netif.h"  // struct netif
+#include <AddrList.h>
 #endif
 #if ARDUINO_VERSION_CODE >= VERSION_CODE(3, 0, 0)
 #include "LwipDhcpServer.h"
@@ -325,7 +326,7 @@ bool WiFiComponent::wifi_sta_connect_(const WiFiAP &ap) {
     return false;
   }
 
-#ifdef IPV6_ENABLE
+#if LWIP_IPV6
   for (bool configured = false; !configured;) {
     for (auto addr : addrList) {
       ESP_LOGV(TAG, "Adress %s", addr.toString().c_str());
