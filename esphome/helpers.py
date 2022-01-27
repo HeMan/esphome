@@ -1,5 +1,6 @@
 import codecs
 
+import ipaddress
 import logging
 import os
 from pathlib import Path
@@ -83,18 +84,6 @@ def mkdir_p(path):
             raise EsphomeError(f"Error creating directories {path}: {err}") from err
 
 
-def is_ip_address(host):
-    parts = host.split(".")
-    if len(parts) != 4:
-        return False
-    try:
-        for p in parts:
-            int(p)
-        return True
-    except ValueError:
-        return False
-
-
 def _resolve_with_zeroconf(host):
     from esphome.core import EsphomeError
     from esphome.zeroconf import EsphomeZeroconf
@@ -126,14 +115,22 @@ def resolve_ip_address(host):
 
     errs = []
 
+    try:
+        return [ipaddress.ip_address(host)]
+    except ValueError:
+        pass
+
     if host.endswith(".local"):
         try:
-            return _resolve_with_zeroconf(host)
+            return [ipaddress.ip_address(_resolve_with_zeroconf(host))]
         except EsphomeError as err:
             errs.append(str(err))
 
     try:
-        return socket.gethostbyname(host)
+        addrinfos = socket.getaddrinfo(host, None, proto=socket.IPPROTO_TCP)
+        hosts = [ipaddress.ip_address(hostinfo[4][0]) for hostinfo in addrinfos]
+
+        return hosts
     except OSError as err:
         errs.append(str(err))
         raise EsphomeError(f"Error resolving IP address: {', '.join(errs)}") from err

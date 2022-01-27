@@ -7,7 +7,7 @@ import time
 import gzip
 
 from esphome.core import EsphomeError
-from esphome.helpers import is_ip_address, resolve_ip_address
+from esphome.helpers import resolve_ip_address
 
 RESPONSE_OK = 0
 RESPONSE_REQUEST_AUTH = 1
@@ -280,30 +280,36 @@ def perform_ota(sock, password, file_handle, filename):
 
 
 def run_ota_impl_(remote_host, remote_port, password, filename):
-    if is_ip_address(remote_host):
-        _LOGGER.info("Connecting to %s", remote_host)
-        ip = remote_host
-    else:
-        _LOGGER.info("Resolving IP address of %s", remote_host)
-        try:
-            ip = resolve_ip_address(remote_host)
-        except EsphomeError as err:
-            _LOGGER.error(
-                "Error resolving IP address of %s. Is it connected to WiFi?",
-                remote_host,
-            )
-            _LOGGER.error(
-                "(If this error persists, please set a static IP address: "
-                "https://esphome.io/components/wifi.html#manual-ips)"
-            )
-            raise OTAError(err) from err
-        _LOGGER.info(" -> %s", ip)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(10.0)
+    _LOGGER.info("Resolving IP address of %s", remote_host)
     try:
-        sock.connect((ip, remote_port))
-    except OSError as err:
+        ips = resolve_ip_address(remote_host)
+    except EsphomeError as err:
+        _LOGGER.error(
+            "Error resolving IP address of %s. Is it connected to WiFi?",
+            remote_host,
+        )
+        _LOGGER.error(
+            "(If this error persists, please set a static IP address: "
+            "https://esphome.io/components/wifi.html#manual-ips)"
+        )
+        raise OTAError(err) from err
+
+    _LOGGER.info(" -> %s", ips)
+    for ip in ips:
+        if ips[0].version == 6:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        else:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        sock.settimeout(10.0)
+        try:
+            sock.connect((str(ip), remote_port))
+        except OSError as _err:
+            err = _err
+            pass
+        else:
+            break
+    else:
         sock.close()
         _LOGGER.error("Connecting to %s:%s failed: %s", remote_host, remote_port, err)
         return 1
