@@ -11,3 +11,4 @@ pytest-mock==3.10.0
 pytest-asyncio==0.20.2
 asyncmock==0.4.2
 hypothesis==5.49.0
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
