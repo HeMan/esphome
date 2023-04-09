@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <lwip/ip_addr.h>
 
 #ifdef USE_ESP32_FRAMEWORK_ARDUINO
 #include <esp_wifi.h>
@@ -75,11 +76,11 @@ enum class WiFiSTAConnectStatus : int {
 
 /// Struct for setting static IPs in WiFiComponent.
 struct ManualIP {
-  network::IPAddress static_ip;
-  network::IPAddress gateway;
-  network::IPAddress subnet;
-  network::IPAddress dns1;  ///< The first DNS server. 0.0.0.0 for default.
-  network::IPAddress dns2;  ///< The second DNS server. 0.0.0.0 for default.
+  ip4_addr_t static_ip;
+  ip4_addr_t gateway;
+  ip4_addr_t subnet;
+  ip_addr_t dns1;  ///< The first DNS server. 0.0.0.0 for default.
+  ip_addr_t dns2;  ///< The second DNS server. 0.0.0.0 for default.
 };
 
 #ifdef USE_WIFI_WPA2_EAP
@@ -239,14 +240,15 @@ class WiFiComponent : public Component {
   void set_btm(bool btm);
   void set_rrm(bool rrm);
 #endif
-
-  network::IPAddress get_ip_address();
+  // TODO: change to ip{4,}_addr_t
+  ip_addr_t get_ip_address();
   std::string get_use_address() const;
   void set_use_address(const std::string &use_address);
 
   const std::vector<WiFiScanResult> &get_scan_result() const { return scan_result_; }
 
-  network::IPAddress wifi_soft_ap_ip();
+  // TODO: change to ip{4,}_addr_t
+  ip_addr_t wifi_soft_ap_ip();
 
   bool has_sta_priority(const bssid_t &bssid) {
     for (auto &it : this->sta_priorities_) {
@@ -275,7 +277,8 @@ class WiFiComponent : public Component {
     });
   }
 
-  network::IPAddress wifi_sta_ip();
+  // TODO: change to ip{4,}_addr_t
+  ip_addr_t wifi_sta_ip();
   std::string wifi_ssid();
   bssid_t wifi_bssid();
 
@@ -301,9 +304,10 @@ class WiFiComponent : public Component {
   bool wifi_start_ap_(const WiFiAP &ap);
   bool wifi_disconnect_();
   int32_t wifi_channel_();
-  network::IPAddress wifi_subnet_mask_();
-  network::IPAddress wifi_gateway_ip_();
-  network::IPAddress wifi_dns_ip_(int num);
+  // TODO: change to ip{4,}_addr_t
+  ip_addr_t wifi_subnet_mask_();
+  ip_addr_t wifi_gateway_ip_();
+  ip_addr_t wifi_dns_ip_(int num);
 
   bool is_captive_portal_active_();
   bool is_esp32_improv_active_();

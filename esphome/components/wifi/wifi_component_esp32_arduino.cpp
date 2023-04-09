@@ -12,6 +12,7 @@
 #include "lwip/apps/sntp.h"
 #include "lwip/dns.h"
 #include "lwip/err.h"
+#include <lwip/ip_addr.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
@@ -113,9 +114,9 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
 
   tcpip_adapter_ip_info_t info;
   memset(&info, 0, sizeof(info));
-  info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-  info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-  info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+  ip4_addr_copy(info.ip, manual_ip->static_ip);
+  ip4_addr_copy(info.gw, manual_ip->gateway);
+  ip4_addr_copy(info.netmask, manual_ip->subnet);
 
   esp_err_t dhcp_stop_ret = tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
   if (dhcp_stop_ret != ESP_OK && dhcp_stop_ret != ESP_ERR_TCPIP_ADAPTER_DHCP_ALREADY_STOPPED) {
@@ -128,30 +129,19 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   }
 
   ip_addr_t dns;
-#if LWIP_IPV6
-  dns.type = IPADDR_TYPE_V4;
-#endif
-  if (uint32_t(manual_ip->dns1) != 0) {
-#if LWIP_IPV6
-    dns.u_addr.ip4.addr = static_cast<uint32_t>(manual_ip->dns1);
-#else
-    dns.addr = static_cast<uint32_t>(manual_ip->dns1);
-#endif
+  if (!ip_addr_isany(&manual_ip->dns1)) {
+      ip_addr_copy(dns, manual_ip->dns1);
     dns_setserver(0, &dns);
   }
-  if (uint32_t(manual_ip->dns2) != 0) {
-#if LWIP_IPV6
-    dns.u_addr.ip4.addr = static_cast<uint32_t>(manual_ip->dns2);
-#else
-    dns.addr = static_cast<uint32_t>(manual_ip->dns2);
-#endif
+  if (!ip_addr_isany(&manual_ip->dns2)) {
+      ip_addr_copy(dns, manual_ip->dns2);
     dns_setserver(1, &dns);
   }
 
   return true;
 }
 
-network::IPAddress WiFiComponent::wifi_sta_ip() {
+ip_addr_t WiFiComponent::wifi_sta_ip() {
   if (!this->has_sta())
     return {};
   tcpip_adapter_ip_info_t ip;
@@ -664,13 +654,13 @@ bool WiFiComponent::wifi_ap_ip_config_(optional<ManualIP> manual_ip) {
   tcpip_adapter_ip_info_t info;
   memset(&info, 0, sizeof(info));
   if (manual_ip.has_value()) {
-    info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-    info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-    info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+    ip4_addr_copy(info.ip, manual_ip->static_ip);
+    ip4_addr_copy(info.gw, manual_ip->gateway);
+    ip4_addr_copy(info.netmask, manual_ip->subnet);
   } else {
-    info.ip.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.gw.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.netmask.addr = static_cast<uint32_t>(network::IPAddress(255, 255, 255, 0));
+    IP4_ADDR(&info.ip, 192, 168, 4, 1);
+    IP4_ADDR(&info.gw, 192, 168, 4, 1);
+    IP4_ADDR(&info.netmask, 255, 255, 255, 0);
   }
   tcpip_adapter_dhcp_status_t dhcp_status;
   tcpip_adapter_dhcps_get_status(TCPIP_ADAPTER_IF_AP, &dhcp_status);
@@ -752,7 +742,7 @@ bool WiFiComponent::wifi_start_ap_(const WiFiAP &ap) {
 
   return true;
 }
-network::IPAddress WiFiComponent::wifi_soft_ap_ip() {
+ip_addr_t WiFiComponent::wifi_soft_ap_ip() {
   tcpip_adapter_ip_info_t ip;
   tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ip);
   return {ip.ip.addr};
@@ -771,9 +761,9 @@ bssid_t WiFiComponent::wifi_bssid() {
 std::string WiFiComponent::wifi_ssid() { return WiFi.SSID().c_str(); }
 int8_t WiFiComponent::wifi_rssi() { return WiFi.RSSI(); }
 int32_t WiFiComponent::wifi_channel_() { return WiFi.channel(); }
-network::IPAddress WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
-network::IPAddress WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
-network::IPAddress WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
+ip_addr_t WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
+ip_addr_t WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
+ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
 void WiFiComponent::wifi_loop_() {}
 
 }  // namespace wifi

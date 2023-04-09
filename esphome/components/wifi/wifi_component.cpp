@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "lwip/err.h"
 #include "lwip/dns.h"
+#include <lwip/ip_addr.h>
 
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
@@ -176,7 +177,8 @@ void WiFiComponent::set_fast_connect(bool fast_connect) { this->fast_connect_ = 
 void WiFiComponent::set_btm(bool btm) { this->btm_ = btm; }
 void WiFiComponent::set_rrm(bool rrm) { this->rrm_ = rrm; }
 #endif
-network::IPAddress WiFiComponent::get_ip_address() {
+  // TODO: change to ip{4,}_addr_t
+ip_addr_t WiFiComponent::get_ip_address() {
   if (this->has_sta())
     return this->wifi_sta_ip();
   if (this->has_ap())
@@ -214,13 +216,14 @@ void WiFiComponent::setup_ap_config_() {
   ESP_LOGCONFIG(TAG, "  AP Password: '%s'", this->ap_.get_password().c_str());
   if (this->ap_.get_manual_ip().has_value()) {
     auto manual = *this->ap_.get_manual_ip();
-    ESP_LOGCONFIG(TAG, "  AP Static IP: '%s'", manual.static_ip.str().c_str());
-    ESP_LOGCONFIG(TAG, "  AP Gateway: '%s'", manual.gateway.str().c_str());
-    ESP_LOGCONFIG(TAG, "  AP Subnet: '%s'", manual.subnet.str().c_str());
+    ESP_LOGCONFIG(TAG, "  AP Static IP: '%s'", ip4addr_ntoa(&manual.static_ip));
+    ESP_LOGCONFIG(TAG, "  AP Gateway: '%s'", ip4addr_ntoa(&manual.gateway));
+    ESP_LOGCONFIG(TAG, "  AP Subnet: '%s'", ip4addr_ntoa(&manual.subnet));
   }
 
   this->ap_setup_ = this->wifi_start_ap_(this->ap_);
-  ESP_LOGCONFIG(TAG, "  IP Address: %s", this->wifi_soft_ap_ip().str().c_str());
+  // TODO: fix ip{4,}_addr_t
+  //  ESP_LOGCONFIG(TAG, "  IP Address: %s", this->wifi_soft_ap_ip().str().c_str());
 
   if (!this->has_sta()) {
     this->state_ = WIFI_COMPONENT_STATE_AP;
@@ -292,8 +295,8 @@ void WiFiComponent::start_connecting(const WiFiAP &ap, bool two) {
   }
   if (ap.get_manual_ip().has_value()) {
     ManualIP m = *ap.get_manual_ip();
-    ESP_LOGV(TAG, "  Manual IP: Static IP=%s Gateway=%s Subnet=%s DNS1=%s DNS2=%s", m.static_ip.str().c_str(),
-             m.gateway.str().c_str(), m.subnet.str().c_str(), m.dns1.str().c_str(), m.dns2.str().c_str());
+    ESP_LOGV(TAG, "  Manual IP: Static IP=%s Gateway=%s Subnet=%s DNS1=%s DNS2=%s", ip4addr_ntoa(&m.static_ip),
+             ip4addr_ntoa(&m.gateway), ip4addr_ntoa(&m.subnet), ipaddr_ntoa(&m.dns1), ipaddr_ntoa(&m.dns2));
   } else {
     ESP_LOGV(TAG, "  Using DHCP IP");
   }
@@ -362,7 +365,8 @@ void WiFiComponent::print_connect_params_() {
 
   ESP_LOGCONFIG(TAG, "  Local MAC: %s", get_mac_address_pretty().c_str());
   ESP_LOGCONFIG(TAG, "  SSID: " LOG_SECRET("'%s'"), wifi_ssid().c_str());
-  ESP_LOGCONFIG(TAG, "  IP Address: %s", wifi_sta_ip().str().c_str());
+  // TODO: fix ip{4,}_addr_t
+  // ESP_LOGCONFIG(TAG, "  IP Address: %s", wifi_sta_ip().str().c_str());
   ESP_LOGCONFIG(TAG, "  BSSID: " LOG_SECRET("%02X:%02X:%02X:%02X:%02X:%02X"), bssid[0], bssid[1], bssid[2], bssid[3],
                 bssid[4], bssid[5]);
   ESP_LOGCONFIG(TAG, "  Hostname: '%s'", App.get_name().c_str());
@@ -372,10 +376,11 @@ void WiFiComponent::print_connect_params_() {
     ESP_LOGV(TAG, "  Priority: %.1f", this->get_sta_priority(*this->selected_ap_.get_bssid()));
   }
   ESP_LOGCONFIG(TAG, "  Channel: %" PRId32, wifi_channel_());
-  ESP_LOGCONFIG(TAG, "  Subnet: %s", wifi_subnet_mask_().str().c_str());
-  ESP_LOGCONFIG(TAG, "  Gateway: %s", wifi_gateway_ip_().str().c_str());
-  ESP_LOGCONFIG(TAG, "  DNS1: %s", wifi_dns_ip_(0).str().c_str());
-  ESP_LOGCONFIG(TAG, "  DNS2: %s", wifi_dns_ip_(1).str().c_str());
+  // TODO: fix ip{4,}_addr_t
+  // ESP_LOGCONFIG(TAG, "  Subnet: %s", wifi_subnet_mask_().str().c_str());
+  // ESP_LOGCONFIG(TAG, "  Gateway: %s", wifi_gateway_ip_().str().c_str());
+  // ESP_LOGCONFIG(TAG, "  DNS1: %s", wifi_dns_ip_(0).str().c_str());
+  // ESP_LOGCONFIG(TAG, "  DNS2: %s", wifi_dns_ip_(1).str().c_str());
 #ifdef USE_WIFI_11KV_SUPPORT
   ESP_LOGCONFIG(TAG, "  BTM: %s", this->btm_ ? "enabled" : "disabled");
   ESP_LOGCONFIG(TAG, "  RRM: %s", this->rrm_ ? "enabled" : "disabled");

@@ -2,6 +2,7 @@
 
 #include <string>
 #include "ip_address.h"
+#include <lwip/ip_addr.h>
 
 namespace esphome {
 namespace network {
@@ -10,7 +11,7 @@ namespace network {
 bool is_connected();
 /// Get the active network hostname
 std::string get_use_address();
-IPAddress get_ip_address();
+ip_addr_t get_ip_address();
 
 }  // namespace network
 }  // namespace esphome

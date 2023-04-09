@@ -145,9 +145,9 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
 #endif
 
   struct ip_info info {};
-  info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-  info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-  info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+  ip4_addr_copy(info.ip, manual_ip->static_ip);
+  ip4_addr_copy(info.gw, manual_ip->gateway);
+  ip4_addr_copy(info.netmask, manual_ip->subnet);
 
   if (dhcp_status == DHCP_STARTED) {
     bool dhcp_stop_ret = wifi_station_dhcpc_stop();
@@ -163,12 +163,12 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   }
 
   ip_addr_t dns;
-  if (uint32_t(manual_ip->dns1) != 0) {
-    dns.addr = static_cast<uint32_t>(manual_ip->dns1);
+  if (!ip_addr_isany(&manual_ip->dns1)) {
+    ip_addr_copy(dns, manual_ip->dns1);
     dns_setserver(0, &dns);
   }
-  if (uint32_t(manual_ip->dns2) != 0) {
-    dns.addr = static_cast<uint32_t>(manual_ip->dns2);
+  if (!ip_addr_isany(&manual_ip->dns2)) {
+    ip_addr_copy(dns, manual_ip->dns2);
     dns_setserver(1, &dns);
   }
 
@@ -183,7 +183,8 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   return ret;
 }
 
-network::IPAddress WiFiComponent::wifi_sta_ip() {
+  // TODO: change to ip{4,}_addr_t
+ip_addr_t WiFiComponent::wifi_sta_ip() {
   if (!this->has_sta())
     return {};
   struct ip_info ip {};
@@ -681,13 +682,13 @@ bool WiFiComponent::wifi_ap_ip_config_(optional<ManualIP> manual_ip) {
 
   struct ip_info info {};
   if (manual_ip.has_value()) {
-    info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-    info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-    info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+    ip4_addr_copy(info.ip, manual_ip->static_ip);
+    ip4_addr_copy(info.gw, manual_ip->gateway);
+    ip4_addr_copy(info.netmask, manual_ip->subnet);
   } else {
-    info.ip.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.gw.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.netmask.addr = static_cast<uint32_t>(network::IPAddress(255, 255, 255, 0));
+    IP4_ADDR(&info.ip, 192, 168, 4, 1);
+    IP4_ADDR(&info.gw, 192, 168, 4, 1);
+    IP4_ADDR(&info.netmask, 255, 255, 255, 0);
   }
 
   if (wifi_softap_dhcps_status() == DHCP_STARTED) {
@@ -706,13 +707,14 @@ bool WiFiComponent::wifi_ap_ip_config_(optional<ManualIP> manual_ip) {
 #endif
 
   struct dhcps_lease lease {};
-  network::IPAddress start_address = info.ip.addr;
-  start_address[3] += 99;
-  lease.start_ip.addr = static_cast<uint32_t>(start_address);
-  ESP_LOGV(TAG, "DHCP server IP lease start: %s", start_address.str().c_str());
-  start_address[3] += 100;
-  lease.end_ip.addr = static_cast<uint32_t>(start_address);
-  ESP_LOGV(TAG, "DHCP server IP lease end: %s", start_address.str().c_str());
+  ip4_addr_t start_address;
+  ip4_addr_copy(start_address, info.ip);
+  start_address.addr += 99;
+  ip4_addr_copy(lease.start_ip, start_address);
+  ESP_LOGV(TAG, "DHCP server IP lease start: %s", ip4addr_ntoa(&lease.start_ip));
+  start_address.addr += 100;
+  ip4_addr_copy(lease.end_ip, start_address);
+  ESP_LOGV(TAG, "DHCP server IP lease end: %s", ip4addr_ntoa(&lease.end_ip));
   if (!wifi_softap_set_dhcps_lease(&lease)) {
     ESP_LOGV(TAG, "Setting SoftAP DHCP lease failed!");
     return false;
@@ -775,7 +777,8 @@ bool WiFiComponent::wifi_start_ap_(const WiFiAP &ap) {
 
   return true;
 }
-network::IPAddress WiFiComponent::wifi_soft_ap_ip() {
+  // TODO: change to ip{4,}_addr_t
+ip_addr_t WiFiComponent::wifi_soft_ap_ip() {
   struct ip_info ip {};
   wifi_get_ip_info(SOFTAP_IF, &ip);
   return {ip.ip.addr};
@@ -792,9 +795,10 @@ bssid_t WiFiComponent::wifi_bssid() {
 std::string WiFiComponent::wifi_ssid() { return WiFi.SSID().c_str(); }
 int8_t WiFiComponent::wifi_rssi() { return WiFi.RSSI(); }
 int32_t WiFiComponent::wifi_channel_() { return WiFi.channel(); }
-network::IPAddress WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
-network::IPAddress WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
-network::IPAddress WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
+  // TODO: change to ip{4,}_addr_t
+ip_addr_t WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
+ip_addr_t WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
+ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
 void WiFiComponent::wifi_loop_() {}
 
 }  // namespace wifi

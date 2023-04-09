@@ -1,5 +1,6 @@
 #include "util.h"
 #include "esphome/core/defines.h"
+#include <lwip/ip_addr.h>
 
 #ifdef USE_WIFI
 #include "esphome/components/wifi/wifi_component.h"
@@ -26,7 +27,7 @@ bool is_connected() {
   return false;
 }
 
-network::IPAddress get_ip_address() {
+ip_addr_t get_ip_address() {
 #ifdef USE_ETHERNET
   if (ethernet::global_eth_component != nullptr)
     return ethernet::global_eth_component->get_ip_address();

@@ -435,9 +435,10 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   }
 
   esp_netif_ip_info_t info;  // struct of ip4_addr_t with ip, netmask, gw
-  info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-  info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-  info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+  memset(&info, 0, sizeof(info));
+  ip4_addr_copy(info.ip, manual_ip->static_ip);
+  ip4_addr_copy(info.gw, manual_ip->gateway);
+  ip4_addr_copy(info.netmask, manual_ip->subnet);
   err = esp_netif_dhcpc_stop(s_sta_netif);
   if (err != ESP_OK && err != ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED) {
     ESP_LOGV(TAG, "esp_netif_dhcpc_stop failed: %s", esp_err_to_name(err));
@@ -450,19 +451,19 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   }
 
   esp_netif_dns_info_t dns;
-  if (uint32_t(manual_ip->dns1) != 0) {
-    dns.ip.u_addr.ip4.addr = static_cast<uint32_t>(manual_ip->dns1);
+  if (!ip_addr_isany(&manual_ip->dns1)) {
+    ip_addr_copy(dns, manual_ip->dns1);
     esp_netif_set_dns_info(s_sta_netif, ESP_NETIF_DNS_MAIN, &dns);
   }
-  if (uint32_t(manual_ip->dns2) != 0) {
-    dns.ip.u_addr.ip4.addr = static_cast<uint32_t>(manual_ip->dns2);
+  if (!ip_addr_isany(&manual_ip->dns2)) {
+    ip_addr_copy(dns, manual_ip->dns2);
     esp_netif_set_dns_info(s_sta_netif, ESP_NETIF_DNS_BACKUP, &dns);
   }
 
   return true;
 }
 
-network::IPAddress WiFiComponent::wifi_sta_ip() {
+ip_addr_t WiFiComponent::wifi_sta_ip() {
   if (!this->has_sta())
     return {};
   esp_netif_ip_info_t ip;
@@ -759,13 +760,13 @@ bool WiFiComponent::wifi_ap_ip_config_(optional<ManualIP> manual_ip) {
 
   esp_netif_ip_info_t info;
   if (manual_ip.has_value()) {
-    info.ip.addr = static_cast<uint32_t>(manual_ip->static_ip);
-    info.gw.addr = static_cast<uint32_t>(manual_ip->gateway);
-    info.netmask.addr = static_cast<uint32_t>(manual_ip->subnet);
+    ip_addr_copy(info.ip, manual_ip->static_ip);
+    ip_addr_copy(info.gw, manual_ip->gateway);
+    ip_addr_copy(info.netmask, manual_ip->subnet);
   } else {
-    info.ip.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.gw.addr = static_cast<uint32_t>(network::IPAddress(192, 168, 4, 1));
-    info.netmask.addr = static_cast<uint32_t>(network::IPAddress(255, 255, 255, 0));
+    IP4_ADDR(&info.ip, 192, 168, 4, 1);
+    IP4_ADDR(&info.gw, 192, 168, 4, 1);
+    IP4_ADDR(&info.netmask, 255, 255, 255, 0);
   }
   esp_netif_dhcp_status_t dhcp_status;
   esp_netif_dhcps_get_status(s_sta_netif, &dhcp_status);
@@ -845,7 +846,7 @@ bool WiFiComponent::wifi_start_ap_(const WiFiAP &ap) {
 
   return true;
 }
-network::IPAddress WiFiComponent::wifi_soft_ap_ip() {
+ip_addr_t WiFiComponent::wifi_soft_ap_ip() {
   esp_netif_ip_info_t ip;
   esp_netif_get_ip_info(s_sta_netif, &ip);
   return {ip.ip.addr};
@@ -893,7 +894,7 @@ int32_t WiFiComponent::wifi_channel_() {
   }
   return primary;
 }
-network::IPAddress WiFiComponent::wifi_subnet_mask_() {
+ip_addr_t WiFiComponent::wifi_subnet_mask_() {
   esp_netif_ip_info_t ip;
   esp_err_t err = esp_netif_get_ip_info(s_sta_netif, &ip);
   if (err != ESP_OK) {
@@ -902,7 +903,7 @@ network::IPAddress WiFiComponent::wifi_subnet_mask_() {
   }
   return {ip.netmask.addr};
 }
-network::IPAddress WiFiComponent::wifi_gateway_ip_() {
+ip_addr_t WiFiComponent::wifi_gateway_ip_() {
   esp_netif_ip_info_t ip;
   esp_err_t err = esp_netif_get_ip_info(s_sta_netif, &ip);
   if (err != ESP_OK) {
@@ -911,7 +912,7 @@ network::IPAddress WiFiComponent::wifi_gateway_ip_() {
   }
   return {ip.gw.addr};
 }
-network::IPAddress WiFiComponent::wifi_dns_ip_(int num) {
+ip_addr_t WiFiComponent::wifi_dns_ip_(int num) {
   const ip_addr_t *dns_ip = dns_getserver(num);
 #if LWIP_IPV6
   return {dns_ip->u_addr.ip4.addr};

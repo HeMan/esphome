@@ -13,7 +13,8 @@ namespace mdns {
 void MDNSComponent::setup() {
   this->compile_records_();
 
-  network::IPAddress addr = network::get_ip_address();
+  // TODO: Fix ip{4,}_addr_t
+/*   network::IPAddress addr = network::get_ip_address();
   MDNS.begin(this->hostname_.c_str(), (uint32_t) addr);
 
   for (const auto &service : this->services_) {
@@ -33,7 +34,7 @@ void MDNSComponent::setup() {
     for (const auto &record : service.txt_records) {
       MDNS.addServiceTxt(service_type, proto, record.key.c_str(), record.value.c_str());
     }
-  }
+  } */
 }
 
 void MDNSComponent::loop() { MDNS.update(); }
