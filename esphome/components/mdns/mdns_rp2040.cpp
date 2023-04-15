@@ -12,9 +12,8 @@ namespace mdns {
 
 void MDNSComponent::setup() {
   this->compile_records_();
-  // TODO: fix ip{4,}_addr_t
-  /*network::IPAddress addr = network::get_ip_address();
-  MDNS.begin(this->hostname_.c_str(), (uint32_t) addr);
+  ip_addr_t addr = network::get_ip_address();
+  MDNS.begin(this->hostname_.c_str(), addr);
 
   for (const auto &service : this->services_) {
     // Strip the leading underscore from the proto and service_type. While it is
@@ -34,7 +33,6 @@ void MDNSComponent::setup() {
       MDNS.addServiceTxt(service_type, proto, record.key.c_str(), record.value.c_str());
     }
   }
-  */
 }
 
 void MDNSComponent::loop() { MDNS.update(); }
