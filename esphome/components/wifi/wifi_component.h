@@ -240,14 +240,12 @@ class WiFiComponent : public Component {
   void set_btm(bool btm);
   void set_rrm(bool rrm);
 #endif
-  // TODO: change to ip{4,}_addr_t
   ip_addr_t get_ip_address();
   std::string get_use_address() const;
   void set_use_address(const std::string &use_address);
 
   const std::vector<WiFiScanResult> &get_scan_result() const { return scan_result_; }
 
-  // TODO: change to ip{4,}_addr_t
   ip_addr_t wifi_soft_ap_ip();
 
   bool has_sta_priority(const bssid_t &bssid) {
@@ -277,7 +275,6 @@ class WiFiComponent : public Component {
     });
   }
 
-  // TODO: change to ip{4,}_addr_t
   ip_addr_t wifi_sta_ip();
   std::string wifi_ssid();
   bssid_t wifi_bssid();
@@ -304,7 +301,6 @@ class WiFiComponent : public Component {
   bool wifi_start_ap_(const WiFiAP &ap);
   bool wifi_disconnect_();
   int32_t wifi_channel_();
-  // TODO: change to ip{4,}_addr_t
   ip_addr_t wifi_subnet_mask_();
   ip_addr_t wifi_gateway_ip_();
   ip_addr_t wifi_dns_ip_(int num);

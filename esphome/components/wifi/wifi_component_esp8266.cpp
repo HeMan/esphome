@@ -183,13 +183,12 @@ bool WiFiComponent::wifi_sta_ip_config_(optional<ManualIP> manual_ip) {
   return ret;
 }
 
-  // TODO: change to ip{4,}_addr_t
 ip_addr_t WiFiComponent::wifi_sta_ip() {
   if (!this->has_sta())
     return {};
   struct ip_info ip {};
   wifi_get_ip_info(STATION_IF, &ip);
-  return {ip.ip.addr};
+  return ip.ip;
 }
 bool WiFiComponent::wifi_apply_hostname_() {
   const std::string &hostname = App.get_name();
@@ -777,11 +776,10 @@ bool WiFiComponent::wifi_start_ap_(const WiFiAP &ap) {
 
   return true;
 }
-  // TODO: change to ip{4,}_addr_t
 ip_addr_t WiFiComponent::wifi_soft_ap_ip() {
   struct ip_info ip {};
   wifi_get_ip_info(SOFTAP_IF, &ip);
-  return {ip.ip.addr};
+  return ip.ip;
 }
 bssid_t WiFiComponent::wifi_bssid() {
   bssid_t bssid{};
@@ -795,10 +793,9 @@ bssid_t WiFiComponent::wifi_bssid() {
 std::string WiFiComponent::wifi_ssid() { return WiFi.SSID().c_str(); }
 int8_t WiFiComponent::wifi_rssi() { return WiFi.RSSI(); }
 int32_t WiFiComponent::wifi_channel_() { return WiFi.channel(); }
-  // TODO: change to ip{4,}_addr_t
-ip_addr_t WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
-ip_addr_t WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
-ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
+ip_addr_t WiFiComponent::wifi_subnet_mask_() { return WiFi.subnetMask(); }
+ip_addr_t WiFiComponent::wifi_gateway_ip_() { return WiFi.gatewayIP(); }
+ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return WiFi.dnsIP(num); }
 void WiFiComponent::wifi_loop_() {}
 
 }  // namespace wifi

@@ -177,7 +177,6 @@ void WiFiComponent::set_fast_connect(bool fast_connect) { this->fast_connect_ = 
 void WiFiComponent::set_btm(bool btm) { this->btm_ = btm; }
 void WiFiComponent::set_rrm(bool rrm) { this->rrm_ = rrm; }
 #endif
-  // TODO: change to ip{4,}_addr_t
 ip_addr_t WiFiComponent::get_ip_address() {
   if (this->has_sta())
     return this->wifi_sta_ip();
@@ -222,8 +221,8 @@ void WiFiComponent::setup_ap_config_() {
   }
 
   this->ap_setup_ = this->wifi_start_ap_(this->ap_);
-  // TODO: fix ip{4,}_addr_t
-  //  ESP_LOGCONFIG(TAG, "  IP Address: %s", this->wifi_soft_ap_ip().str().c_str());
+  ip_addr_t soft_ap_ip = this->wifi_soft_ap_ip();
+  ESP_LOGCONFIG(TAG, "  IP Address: %s", ipaddr_ntoa(&soft_ap_ip));
 
   if (!this->has_sta()) {
     this->state_ = WIFI_COMPONENT_STATE_AP;
@@ -365,8 +364,9 @@ void WiFiComponent::print_connect_params_() {
 
   ESP_LOGCONFIG(TAG, "  Local MAC: %s", get_mac_address_pretty().c_str());
   ESP_LOGCONFIG(TAG, "  SSID: " LOG_SECRET("'%s'"), wifi_ssid().c_str());
-  // TODO: fix ip{4,}_addr_t
-  // ESP_LOGCONFIG(TAG, "  IP Address: %s", wifi_sta_ip().str().c_str());
+  ip_addr_t ip_addr_toprint;
+  ip_addr_toprint =  wifi_sta_ip();
+  ESP_LOGCONFIG(TAG, "  IP Address: %s", ipaddr_ntoa(&ip_addr_toprint));
   ESP_LOGCONFIG(TAG, "  BSSID: " LOG_SECRET("%02X:%02X:%02X:%02X:%02X:%02X"), bssid[0], bssid[1], bssid[2], bssid[3],
                 bssid[4], bssid[5]);
   ESP_LOGCONFIG(TAG, "  Hostname: '%s'", App.get_name().c_str());
@@ -376,11 +376,14 @@ void WiFiComponent::print_connect_params_() {
     ESP_LOGV(TAG, "  Priority: %.1f", this->get_sta_priority(*this->selected_ap_.get_bssid()));
   }
   ESP_LOGCONFIG(TAG, "  Channel: %" PRId32, wifi_channel_());
-  // TODO: fix ip{4,}_addr_t
-  // ESP_LOGCONFIG(TAG, "  Subnet: %s", wifi_subnet_mask_().str().c_str());
-  // ESP_LOGCONFIG(TAG, "  Gateway: %s", wifi_gateway_ip_().str().c_str());
-  // ESP_LOGCONFIG(TAG, "  DNS1: %s", wifi_dns_ip_(0).str().c_str());
-  // ESP_LOGCONFIG(TAG, "  DNS2: %s", wifi_dns_ip_(1).str().c_str());
+  ip_addr_toprint = wifi_subnet_mask_();
+  ESP_LOGCONFIG(TAG, "  Subnet: %s", ipaddr_ntoa(&ip_addr_toprint));
+  ip_addr_toprint = wifi_gateway_ip_();
+  ESP_LOGCONFIG(TAG, "  Gateway: %s", ipaddr_ntoa(&ip_addr_toprint));
+  ip_addr_toprint = wifi_dns_ip_(0);
+  ESP_LOGCONFIG(TAG, "  DNS1: %s", ipaddr_ntoa(&ip_addr_toprint));
+  ip_addr_toprint = wifi_dns_ip_(1);
+  ESP_LOGCONFIG(TAG, "  DNS2: %s", ipaddr_ntoa(&ip_addr_toprint));
 #ifdef USE_WIFI_11KV_SUPPORT
   ESP_LOGCONFIG(TAG, "  BTM: %s", this->btm_ ? "enabled" : "disabled");
   ESP_LOGCONFIG(TAG, "  RRM: %s", this->rrm_ ? "enabled" : "disabled");

@@ -901,7 +901,7 @@ ip_addr_t WiFiComponent::wifi_subnet_mask_() {
     ESP_LOGW(TAG, "esp_netif_get_ip_info failed: %s", esp_err_to_name(err));
     return {};
   }
-  return {ip.netmask.addr};
+  return ip.netmask;
 }
 ip_addr_t WiFiComponent::wifi_gateway_ip_() {
   esp_netif_ip_info_t ip;
@@ -910,7 +910,7 @@ ip_addr_t WiFiComponent::wifi_gateway_ip_() {
     ESP_LOGW(TAG, "esp_netif_get_ip_info failed: %s", esp_err_to_name(err));
     return {};
   }
-  return {ip.gw.addr};
+  return ip.gw;
 }
 ip_addr_t WiFiComponent::wifi_dns_ip_(int num) {
   const ip_addr_t *dns_ip = dns_getserver(num);

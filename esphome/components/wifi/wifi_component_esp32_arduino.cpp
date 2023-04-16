@@ -761,9 +761,9 @@ bssid_t WiFiComponent::wifi_bssid() {
 std::string WiFiComponent::wifi_ssid() { return WiFi.SSID().c_str(); }
 int8_t WiFiComponent::wifi_rssi() { return WiFi.RSSI(); }
 int32_t WiFiComponent::wifi_channel_() { return WiFi.channel(); }
-ip_addr_t WiFiComponent::wifi_subnet_mask_() { return {WiFi.subnetMask()}; }
-ip_addr_t WiFiComponent::wifi_gateway_ip_() { return {WiFi.gatewayIP()}; }
-ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return {WiFi.dnsIP(num)}; }
+ip_addr_t WiFiComponent::wifi_subnet_mask_() { return WiFi.subnetMask(); }
+ip_addr_t WiFiComponent::wifi_gateway_ip_() { return WiFi.gatewayIP(); }
+ip_addr_t WiFiComponent::wifi_dns_ip_(int num) { return WiFi.dnsIP(num); }
 void WiFiComponent::wifi_loop_() {}
 
 }  // namespace wifi
