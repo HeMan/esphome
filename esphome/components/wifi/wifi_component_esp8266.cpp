@@ -709,10 +709,10 @@ bool WiFiComponent::wifi_ap_ip_config_(optional<ManualIP> manual_ip) {
   struct dhcps_lease lease {};
   ip4_addr_t start_address;
   ip4_addr_copy(start_address, info.ip);
-  start_address.addr += 99;
+  start_address.addr += 99*256*256*256;
   ip4_addr_copy(lease.start_ip, start_address);
   ESP_LOGV(TAG, "DHCP server IP lease start: %s", ip4addr_ntoa(&lease.start_ip));
-  start_address.addr += 100;
+  start_address.addr += 100*256*256*256;
   ip4_addr_copy(lease.end_ip, start_address);
   ESP_LOGV(TAG, "DHCP server IP lease end: %s", ip4addr_ntoa(&lease.end_ip));
   if (!wifi_softap_set_dhcps_lease(&lease)) {

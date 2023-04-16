@@ -35,7 +35,6 @@ from esphome.const import (
 )
 from esphome.core import CORE, HexInt, coroutine_with_priority
 from esphome.components.esp32 import add_idf_sdkconfig_option
-from esphome.components.network import IPAddress
 from . import wpa2_eap
 
 AUTO_LOAD = ["network"]
@@ -317,8 +316,8 @@ def eap_auth(config):
 
 def safe_ip(ip):
     if ip is None:
-        return IPAddress(0, 0, 0, 0)
-    return IPAddress(*ip.args)
+        return [0]
+    return [ip.args[0]+ip.args[1]*256+ip.args[2]*256*256+ip.args[3]*256*256*256]
 
 
 def manual_ip(config):
