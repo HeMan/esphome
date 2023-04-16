@@ -11,9 +11,9 @@ class IPAddressWiFiInfo : public PollingComponent, public text_sensor::TextSenso
  public:
   void update() override {
     auto ip = wifi::global_wifi_component->wifi_sta_ip();
-    if (ip != this->last_ip_) {
-      this->last_ip_ = ip;
-      this->publish_state(ip.str());
+    if (!ip_addr_cmp(ip, this->last_ip_)) {
+      ip_addr_copy(this->last_ip_, ip);
+      this->publish_state(ipaddr_ntoa(ip));
     }
   }
   float get_setup_priority() const override { return setup_priority::AFTER_WIFI; }
@@ -21,7 +21,7 @@ class IPAddressWiFiInfo : public PollingComponent, public text_sensor::TextSenso
   void dump_config() override;
 
  protected:
-  network::IPAddress last_ip_;
+  ip_addr_t last_ip_;
 };
 
 class ScanResultsWiFiInfo : public PollingComponent, public text_sensor::TextSensor {
