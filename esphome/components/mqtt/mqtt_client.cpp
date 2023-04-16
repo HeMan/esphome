@@ -64,7 +64,7 @@ void MQTTClientComponent::setup() {
 void MQTTClientComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "MQTT:");
   ESP_LOGCONFIG(TAG, "  Server Address: %s:%u (%s)", this->credentials_.address.c_str(), this->credentials_.port,
-                this->ip_.str().c_str());
+                ipaddr_ntoa(&this->ip_));
   ESP_LOGCONFIG(TAG, "  Username: " LOG_SECRET("'%s'"), this->credentials_.username.c_str());
   ESP_LOGCONFIG(TAG, "  Client ID: " LOG_SECRET("'%s'"), this->credentials_.client_id.c_str());
   if (!this->discovery_info_.prefix.empty()) {
@@ -103,16 +103,7 @@ void MQTTClientComponent::start_dnslookup_() {
     case ERR_OK: {
       // Got IP immediately
       this->dns_resolved_ = true;
-#ifdef USE_ESP32
-#if LWIP_IPV6
-      this->ip_ = addr.u_addr.ip4.addr;
-#else
-      this->ip_ = addr.addr;
-#endif
-#endif
-#ifdef USE_ESP8266
-      this->ip_ = addr.addr;
-#endif
+      ip_addr_copy(this->ip_, addr);
       this->start_connect_();
       return;
     }
@@ -151,7 +142,7 @@ void MQTTClientComponent::check_dnslookup_() {
     return;
   }
 
-  ESP_LOGD(TAG, "Resolved broker IP address to %s", this->ip_.str().c_str());
+  ESP_LOGD(TAG, "Resolved broker IP address to %s", ipaddr_ntoa(&this->ip_));
   this->start_connect_();
 }
 #if defined(USE_ESP8266) && LWIP_VERSION_MAJOR == 1
@@ -163,16 +154,7 @@ void MQTTClientComponent::dns_found_callback(const char *name, const ip_addr_t *
   if (ipaddr == nullptr) {
     a_this->dns_resolve_error_ = true;
   } else {
-#ifdef USE_ESP32
-#if LWIP_IPV6
-    a_this->ip_ = ipaddr->u_addr.ip4.addr;
-#else
-    a_this->ip_ = ipaddr->addr;
-#endif
-#endif  // USE_ESP32
-#ifdef USE_ESP8266
-    a_this->ip_ = ipaddr->addr;
-#endif
+    ip_addr_copy(a_this->ip_, *ipaddr);
     a_this->dns_resolved_ = true;
   }
 }

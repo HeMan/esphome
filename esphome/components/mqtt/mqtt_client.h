@@ -301,7 +301,7 @@ class MQTTClientComponent : public Component {
 #endif
 
   MQTTClientState state_{MQTT_CLIENT_DISCONNECTED};
-  network::IPAddress ip_;
+  ip_addr_t ip_;
   bool dns_resolved_{false};
   bool dns_resolve_error_{false};
   std::vector<MQTTComponent *> children_;

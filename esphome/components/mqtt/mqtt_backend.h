@@ -4,6 +4,7 @@
 #include <map>
 #include "esphome/components/network/ip_address.h"
 #include "esphome/core/helpers.h"
+#include <lwip/ip_addr.h>
 
 namespace esphome {
 namespace mqtt {
@@ -41,7 +42,7 @@ class MQTTBackend {
   virtual void set_clean_session(bool clean_session) = 0;
   virtual void set_credentials(const char *username, const char *password) = 0;
   virtual void set_will(const char *topic, uint8_t qos, bool retain, const char *payload) = 0;
-  virtual void set_server(network::IPAddress ip, uint16_t port) = 0;
+  virtual void set_server(ip_addr_t ip, uint16_t port) = 0;
   virtual void set_server(const char *host, uint16_t port) = 0;
   virtual void set_on_connect(std::function<on_connect_callback_t> &&callback) = 0;
   virtual void set_on_disconnect(std::function<on_disconnect_callback_t> &&callback) = 0;

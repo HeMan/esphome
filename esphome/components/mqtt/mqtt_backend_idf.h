@@ -61,8 +61,8 @@ class MQTTBackendIDF final : public MQTTBackend {
       this->lwt_message_ = payload;
     this->lwt_retain_ = retain;
   }
-  void set_server(network::IPAddress ip, uint16_t port) final {
-    this->host_ = ip.str();
+  void set_server(ip_addr_t ip, uint16_t port) final {
+    ip_addr_copy(this->host_, ip);
     this->port_ = port;
   }
   void set_server(const char *host, uint16_t port) final {
