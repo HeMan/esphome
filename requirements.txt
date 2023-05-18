@@ -19,3 +19,4 @@ kconfiglib==13.7.1
 
 # esp-idf >= 5.0 requires this
 pyparsing >= 3.0
+starlette>=0.27.0 # not directly required, pinned by Snyk to avoid a vulnerability
