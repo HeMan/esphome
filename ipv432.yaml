@@ -1,0 +1,41 @@
+esphome:
+  name: ipv432
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    # version: dev
+    # platform_version: 3.0.0
+network:
+#  enable_ipv6: false
+
+wifi:
+  ssid: suxnet1
+  password: !secret wifipwd
+  ap:
+    ssid: "fallback"
+    password: "fallbackpwd"
+    # ap_timeout: 5s
+    manual_ip:
+      static_ip: 192.168.10.1
+      gateway: 192.168.10.1
+      subnet: 255.255.255.0
+
+debug:
+
+logger:
+  level: VERY_VERBOSE
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+
+
+api:
+
+#web_server:
+#  port: 80
+#mqtt:
+#  broker: 2001:470:28:879:216:3eff:feee:85b

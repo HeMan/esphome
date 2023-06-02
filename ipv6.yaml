@@ -1,0 +1,32 @@
+esphome:
+  name: ipv6
+  platform: ESP8266
+  board: d1_mini_pro
+  # arduino_version: 2.5.2
+
+wifi:
+  ssid: suxnet
+  password: !secret wifipwd
+
+network:
+  enable_ipv6: true
+
+debug:
+
+logger:
+  level: VERY_VERBOSE
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+
+api:
+
+ota:
+
+#web_server:
+#  port: 80
+
+mqtt:
+  broker: 2001:470:28:879::34b 

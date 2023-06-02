@@ -1,0 +1,44 @@
+esphome:
+  name: ipv6rpi
+
+rp2040:
+  board: rpipicow
+  framework:
+    # Required until https://github.com/platformio/platform-raspberrypi/pull/36 is merged
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+network:
+  enable_ipv6: true
+
+
+wifi:
+  ssid: suxnet
+  password: !secret wifipwd
+#  ap:
+#    ssid: "fallback"
+#    password: "fallbackpwd"
+#    ap_timeout: 5s
+#    manual_ip:
+#      static_ip: 192.168.10.1
+#      gateway: 192.168.10.1
+#      subnet: 255.255.255.0
+
+#debug:
+
+logger:
+  level: VERY_VERBOSE
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+
+
+api:
+
+ota:
+
+#web_server:
+#  port: 80
+#mqtt:
+#  broker: 2001:470:28:879:216:3eff:feee:85b

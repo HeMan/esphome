@@ -1,0 +1,40 @@
+esphome:
+  name: ipv6eth
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    # version: dev
+    # platform_version: 3.0.0
+    #
+network:
+  enable_ipv6: true
+
+#ethernet:
+#  type: LAN8720
+#  mdc_pin: GPIO23
+#  mdio_pin: GPIO18
+#  clk_mode: GPIO0_IN
+#  phy_addr: 0
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  phy_addr: 0
+
+
+
+debug:
+
+logger:
+  level: VERY_VERBOSE
+
+api:
+
+#web_server:
+#  port: 80
+#mqtt:
+#  broker: 2001:470:28:879:216:3eff:feee:85b
