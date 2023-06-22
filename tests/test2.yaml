@@ -8,6 +8,9 @@ esphome:
 substitutions:
   devicename: test2
 
+network:
+  enable_ipv6: true
+
 ethernet:
   type: LAN8720
   mdc_pin: GPIO23

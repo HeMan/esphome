@@ -9,6 +9,9 @@ esp32:
   framework:
     type: arduino
 
+network:
+  enable_ipv6: true
+
 esphome:
   name: esp32-s3-test
 

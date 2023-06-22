@@ -16,6 +16,9 @@ esp8266:
   board: d1_mini
   early_pin_init: true
 
+network:
+  enable_ipv6: true
+
 substitutions:
   device_name: test3
   device_comment: test3 device

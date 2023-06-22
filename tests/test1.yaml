@@ -5,6 +5,9 @@ substitutions:
   textname: template
   roomname: living_room
 
+network:
+  enable_ipv6: true
+
 esphome:
   name: test1
   name_add_mac_suffix: true
