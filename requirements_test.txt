@@ -11,3 +11,4 @@ pytest-mock==3.14.0
 pytest-asyncio==0.23.6
 asyncmock==0.4.2
 hypothesis==6.92.1
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
