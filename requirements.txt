@@ -27,3 +27,4 @@ pyparsing >= 3.0
 
 # For autocompletion
 argcomplete>=2.0.0
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
