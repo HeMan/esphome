@@ -27,6 +27,7 @@ UDPComponent = udp_ns.class_("UDPComponent", cg.PollingComponent)
 CONF_BROADCAST = "broadcast"
 CONF_BROADCAST_ID = "broadcast_id"
 CONF_ADDRESSES = "addresses"
+CONF_LISTEN_ADDRESS = "listen_address"
 CONF_PROVIDER = "provider"
 CONF_PROVIDERS = "providers"
 CONF_REMOTE_ID = "remote_id"
@@ -62,6 +63,7 @@ ENCRYPTION_SCHEMA = {
 PROVIDER_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_NAME): cv.valid_name,
+        cv.Optional(CONF_LISTEN_ADDRESS, default="255.255.255.255"): cv.ipv4,
     }
 ).extend(ENCRYPTION_SCHEMA)
 
@@ -107,6 +109,7 @@ SENSOR_SCHEMA = cv.Schema(
     {
         cv.Optional(CONF_REMOTE_ID): cv.string_strict,
         cv.Required(CONF_PROVIDER): cv.valid_name,
+        cv.Optional(CONF_LISTEN_ADDRESS, default="255.255.255.255"): cv.ipv4,
         cv.GenerateID(CONF_UDP_ID): cv.use_id(UDPComponent),
     }
 )
@@ -154,5 +157,10 @@ async def to_code(config):
     for provider in config.get(CONF_PROVIDERS, ()):
         name = provider[CONF_NAME]
         cg.add(var.add_provider(name))
+        cg.add(
+            var.set_provider_listen_address(
+                name, str(provider.get(CONF_LISTEN_ADDRESS))
+            )
+        )
         if encryption := provider.get(CONF_ENCRYPTION):
             cg.add(var.set_provider_encryption(name, hash_encryption_key(encryption)))

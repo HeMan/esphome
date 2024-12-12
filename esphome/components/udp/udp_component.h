@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/components/network/ip_address.h"
 #ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
 #endif
@@ -21,6 +22,7 @@ namespace udp {
 
 struct Provider {
   std::vector<uint8_t> encryption_key;
+  network::IPAddress listen_address;
   const char *name;
   uint32_t last_code[2];
 };
@@ -95,6 +97,9 @@ class UDPComponent : public PollingComponent {
   void set_ping_pong_recycle_time(uint32_t recycle_time) { this->ping_pong_recyle_time_ = recycle_time; }
   void set_provider_encryption(const char *name, std::vector<uint8_t> key) {
     this->providers_[name].encryption_key = std::move(key);
+  }
+  void set_provider_listen_address(const char *name, const char *address) {
+    this->providers_[name].listen_address = network::IPAddress(address);
   }
 
  protected:

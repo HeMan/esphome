@@ -260,6 +260,20 @@ void UDPComponent::setup() {
       this->status_set_error("Unable to bind socket");
       return;
     }
+    for (auto &host : this->providers_) {
+      if (host.second.listen_address.is_multicast()) {
+        struct ip_mreq imreq = {0};
+        imreq.imr_interface.s_addr = IPADDR_ANY;
+        inet_aton(host.second.listen_address.str().c_str(), &imreq.imr_multiaddr.s_addr);
+        err = this->listen_socket_->setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(struct ip_mreq));
+        if (err < 0) {
+          ESP_LOGE(TAG, "Failed to set IP_ADD_MEMBERSHIP. Error %d", errno);
+          this->mark_failed();
+          this->status_set_error("Failed to set IP_ADD_MEMBERSHIP");
+          return;
+        }
+      }
+    }
   }
 #endif
 #ifdef USE_SOCKET_IMPL_LWIP_TCP
@@ -579,6 +593,7 @@ void UDPComponent::dump_config() {
 #endif
   for (const auto &host : this->providers_) {
     ESP_LOGCONFIG(TAG, "  Remote host: %s", host.first.c_str());
+    ESP_LOGCONFIG(TAG, "    Listen address: %s", host.second.listen_address.str().c_str());
     ESP_LOGCONFIG(TAG, "    Encrypted: %s", YESNO(!host.second.encryption_key.empty()));
 #ifdef USE_SENSOR
     for (const auto &sensor : this->remote_sensors_[host.first.c_str()])
