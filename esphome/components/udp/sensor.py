@@ -4,6 +4,7 @@ from esphome.config_validation import All, has_at_least_one_key
 from esphome.const import CONF_ID
 
 from . import (
+    CONF_LISTEN_ADDRESS,
     CONF_PROVIDER,
     CONF_REMOTE_ID,
     CONF_UDP_ID,
@@ -24,4 +25,7 @@ async def to_code(config):
     var = await new_sensor(config)
     comp = await cg.get_variable(config[CONF_UDP_ID])
     remote_id = str(config.get(CONF_REMOTE_ID) or config.get(CONF_ID))
-    cg.add(comp.add_remote_sensor(config[CONF_PROVIDER], remote_id, var))
+    listen_address = str(config.get(CONF_LISTEN_ADDRESS))
+    cg.add(
+        comp.add_remote_sensor(config[CONF_PROVIDER], remote_id, listen_address, var)
+    )

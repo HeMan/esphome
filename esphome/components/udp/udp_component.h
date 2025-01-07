@@ -54,9 +54,11 @@ class UDPComponent : public PollingComponent {
     Sensor st{sensor, id, true};
     this->sensors_.push_back(st);
   }
-  void add_remote_sensor(const char *hostname, const char *remote_id, sensor::Sensor *sensor) {
+  void add_remote_sensor(const char *hostname, const char *remote_id, const char *listen_address,
+                         sensor::Sensor *sensor) {
     this->add_provider(hostname);
     this->remote_sensors_[hostname][remote_id] = sensor;
+    this->set_provider_listen_address(hostname, listen_address);
   }
 #endif
 #ifdef USE_BINARY_SENSOR
@@ -65,9 +67,11 @@ class UDPComponent : public PollingComponent {
     this->binary_sensors_.push_back(st);
   }
 
-  void add_remote_binary_sensor(const char *hostname, const char *remote_id, binary_sensor::BinarySensor *sensor) {
+  void add_remote_binary_sensor(const char *hostname, const char *remote_id, const char *listen_address,
+                                binary_sensor::BinarySensor *sensor) {
     this->add_provider(hostname);
     this->remote_binary_sensors_[hostname][remote_id] = sensor;
+    this->set_provider_listen_address(hostname, listen_address);
   }
 #endif
   void add_address(const char *addr) { this->addresses_.emplace_back(addr); }
