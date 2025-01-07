@@ -265,6 +265,7 @@ void UDPComponent::setup() {
         struct ip_mreq imreq = {0};
         imreq.imr_interface.s_addr = IPADDR_ANY;
         inet_aton(host.second.listen_address.str().c_str(), &imreq.imr_multiaddr.s_addr);
+        ESP_LOGVV(TAG, "Join multicast %s", host.second.listen_address.str().c_str());
         err = this->listen_socket_->setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(struct ip_mreq));
         if (err < 0) {
           ESP_LOGE(TAG, "Failed to set IP_ADD_MEMBERSHIP. Error %d", errno);
