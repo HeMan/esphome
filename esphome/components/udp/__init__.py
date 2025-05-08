@@ -11,7 +11,14 @@ from esphome.components.packet_transport import (
     CONF_SENSORS,
 )
 import esphome.config_validation as cv
-from esphome.const import CONF_DATA, CONF_ID, CONF_PORT, CONF_TRIGGER_ID
+from esphome.const import (
+    CONF_DATA,
+    CONF_ENABLE_IPV6,
+    CONF_ID,
+    CONF_NETWORK,
+    CONF_PORT,
+    CONF_TRIGGER_ID,
+)
 from esphome.core import ID, Lambda
 from esphome.cpp_generator import ExpressionStatement, MockObj
 import esphome.final_validate as fv
@@ -39,6 +46,15 @@ UDP_SCHEMA = cv.Schema(
 )
 
 
+def _final_validate(config):
+    enable_ipv6 = fv.full_config.get().get(CONF_NETWORK).get(CONF_ENABLE_IPV6)
+    if not enable_ipv6:
+        for address in config[CONF_ADDRESSES]:
+            cv.ipv4address(address)
+        cv.ipv4address_multi_broadcast(config[CONF_LISTEN_ADDRESS])
+    return config
+
+
 def is_relocated(option):
     def validator(value):
         raise cv.Invalid(
@@ -46,15 +62,6 @@ def is_relocated(option):
         )
 
     return validator
-
-
-def _final_validate(config):
-    enable_ipv6 = fv.full_config.get().get("network").get("enable_ipv6")
-    if not enable_ipv6:
-        for address in config[CONF_ADDRESSES]:
-            cv.ipv4address(address)
-        cv.ipv4address_multi_broadcast(config[CONF_LISTEN_ADDRESS])
-    return config
 
 
 RELOCATED = {
