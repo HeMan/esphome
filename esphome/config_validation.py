@@ -1271,9 +1271,7 @@ def ipv6address(value):
 def ipv4address_multi_broadcast(value):
     address = ipv4address(value)
     if not (address.is_multicast or (address == IPv4Address("255.255.255.255"))):
-        raise Invalid(
-            f"{value} is not a multicast address nor local broadcast address"
-        )
+        raise Invalid(f"{value} is not a multicast address nor local broadcast address")
     return address
 
 
@@ -1282,6 +1280,16 @@ def ipaddress(value):
         address = ip_address(value)
     except ValueError as exc:
         raise Invalid(f"{value} is not a valid IP address") from exc
+    return address
+
+
+def ipaddress_multi_broadcast(value):
+    try:
+        address = ip_address(value)
+    except ValueError as exc:
+        raise Invalid(f"{value} is not a valid IP address") from exc
+    if not (address.is_multicast or (address == IPv4Address("255.255.255.255"))):
+        raise Invalid(f"{value} is not a multicast address nor local broadcast address")
     return address
 
 

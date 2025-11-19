@@ -46,17 +46,14 @@ def is_relocated(option):
         )
 
     return validator
+
+
 def _final_validate(config):
     enable_ipv6 = fv.full_config.get().get("network").get("enable_ipv6")
     if not enable_ipv6:
         for address in config[CONF_ADDRESSES]:
             cv.ipv4address(address)
-    return config
-
-
-def require_internal_with_name(config):
-    if CONF_NAME in config and CONF_INTERNAL not in config:
-        raise cv.Invalid("Must provide internal: config when using name:")
+        cv.ipv4address_multi_broadcast(config[CONF_LISTEN_ADDRESS])
     return config
 
 
@@ -86,7 +83,7 @@ CONFIG_SCHEMA = cv.COMPONENT_SCHEMA.extend(
         ),
         cv.Optional(
             CONF_LISTEN_ADDRESS, default="255.255.255.255"
-        ): cv.ipv4address_multi_broadcast,
+        ): cv.ipaddress_multi_broadcast,
         cv.Optional(CONF_ADDRESSES, default=["255.255.255.255"]): cv.ensure_list(
             cv.ipv4address,
         ),
