@@ -184,11 +184,11 @@ void MQTTClientComponent::dump_config() {
   // clang-format off
   ESP_LOGCONFIG(TAG,
                 "MQTT:\n"
-                "  Server Address: %s:%u (%s)\n"
+                "  Server Address: %s:%u\n"
                 "  Username: " LOG_SECRET("'%s'") "\n"
                 "  Client ID: " LOG_SECRET("'%s'") "\n"
                 "  Clean Session: %s",
-                this->credentials_.address.c_str(), this->credentials_.port, this->ip_.str_to(ip_buf),
+                this->ip_.str_to(ip_buf), this->credentials_.port,
                 this->credentials_.username.c_str(), this->credentials_.client_id.c_str(),
                 YESNO(this->credentials_.clean_session));
   // clang-format on
@@ -215,49 +215,51 @@ bool MQTTClientComponent::can_proceed() {
 }
 
 void MQTTClientComponent::start_dnslookup_() {
-  for (auto &subscription : this->subscriptions_) {
-    subscription.subscribed = false;
-    subscription.resubscribe_timeout = 0;
-  }
+  if (!this->credentials_.address.has_value()) {
+    for (auto &subscription : this->subscriptions_) {
+      subscription.subscribed = false;
+      subscription.resubscribe_timeout = 0;
+    }
 
-  this->status_set_warning();
-  this->dns_resolve_error_ = false;
-  this->dns_resolved_ = false;
-  ip_addr_t addr;
-  err_t err;
-  {
-    LwIPLock lock;
+    this->status_set_warning();
+    this->dns_resolve_error_ = false;
+    this->dns_resolved_ = false;
+    ip_addr_t addr;
+    err_t err;
+    {
+      LwIPLock lock;
 #if USE_NETWORK_IPV6
-    err = dns_gethostbyname_addrtype(this->credentials_.address.c_str(), &addr, MQTTClientComponent::dns_found_callback,
-                                     this, LWIP_DNS_ADDRTYPE_IPV6_IPV4);
+      err = dns_gethostbyname_addrtype(this->credentials_.hostname.value().c_str(), &addr,
+                                       MQTTClientComponent::dns_found_callback, this, LWIP_DNS_ADDRTYPE_IPV6_IPV4);
 #else
-    err = dns_gethostbyname_addrtype(this->credentials_.address.c_str(), &addr, MQTTClientComponent::dns_found_callback,
-                                     this, LWIP_DNS_ADDRTYPE_IPV4);
+      err = dns_gethostbyname_addrtype(this->credentials_.hostname.value().c_str(), &addr,
+                                       MQTTClientComponent::dns_found_callback, this, LWIP_DNS_ADDRTYPE_IPV4);
 #endif /* USE_NETWORK_IPV6 */
-  }
-  switch (err) {
-    case ERR_OK: {
-      // Got IP immediately
-      this->dns_resolved_ = true;
-      this->ip_ = network::IPAddress(&addr);
-      this->start_connect_();
-      return;
     }
-    case ERR_INPROGRESS: {
-      // wait for callback
-      ESP_LOGD(TAG, "Resolving broker IP address");
-      break;
+    switch (err) {
+      case ERR_OK: {
+        // Got IP immediately
+        this->dns_resolved_ = true;
+        this->ip_ = network::IPAddress(&addr);
+        this->start_connect_();
+        return;
+      }
+      case ERR_INPROGRESS: {
+        // wait for callback
+        ESP_LOGD(TAG, "Resolving broker IP address");
+        break;
+      }
+      default:
+      case ERR_ARG: {
+        // error
+        ESP_LOGW(TAG, "Error resolving broker IP address: %d", err);
+        break;
+      }
     }
-    default:
-    case ERR_ARG: {
-      // error
-      ESP_LOGW(TAG, "Error resolving broker IP address: %d", err);
-      break;
-    }
-  }
 
-  this->state_ = MQTT_CLIENT_RESOLVING_ADDRESS;
-  this->connect_begin_ = millis();
+    this->state_ = MQTT_CLIENT_RESOLVING_ADDRESS;
+    this->connect_begin_ = millis();
+  }
 }
 void MQTTClientComponent::check_dnslookup_() {
   if (!this->dns_resolved_ && millis() - this->connect_begin_ > 20000) {
@@ -265,7 +267,7 @@ void MQTTClientComponent::check_dnslookup_() {
   }
 
   if (this->dns_resolve_error_) {
-    ESP_LOGW(TAG, "Couldn't resolve IP address for '%s'", this->credentials_.address.c_str());
+    ESP_LOGW(TAG, "Couldn't resolve IP address for '%s'", this->credentials_.hostname.value().c_str());
     this->state_ = MQTT_CLIENT_DISCONNECTED;
     this->disconnect_reason_ = MQTTClientDisconnectReason::DNS_RESOLVE_ERROR;
     this->on_disconnect_.call(MQTTClientDisconnectReason::DNS_RESOLVE_ERROR);
@@ -278,6 +280,7 @@ void MQTTClientComponent::check_dnslookup_() {
 
   char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
   ESP_LOGD(TAG, "Resolved broker IP address to %s", this->ip_.str_to(ip_buf));
+  this->credentials_.address = this->ip_;
   this->start_connect_();
 }
 #if defined(USE_ESP8266) && LWIP_VERSION_MAJOR == 1
@@ -290,6 +293,7 @@ void MQTTClientComponent::dns_found_callback(const char *name, const ip_addr_t *
     a_this->dns_resolve_error_ = true;
   } else {
     a_this->ip_ = network::IPAddress(ipaddr);
+    a_this->credentials_.address = a_this->ip_;
     a_this->dns_resolved_ = true;
   }
 }
@@ -313,7 +317,7 @@ void MQTTClientComponent::start_connect_() {
 
   this->mqtt_backend_.set_credentials(username, password);
 
-  this->mqtt_backend_.set_server(this->credentials_.address.c_str(), this->credentials_.port);
+  this->mqtt_backend_.set_server(this->credentials_.address.value(), this->credentials_.port);
   if (!this->last_will_.topic.empty()) {
     this->mqtt_backend_.set_will(this->last_will_.topic.c_str(), this->last_will_.qos, this->last_will_.retain,
                                  this->last_will_.payload.c_str());

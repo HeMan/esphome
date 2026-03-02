@@ -10,6 +10,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
+#include "esphome/core/optional.h"
 #ifdef USE_LOGGER
 #include "esphome/components/logger/logger.h"
 #endif
@@ -49,8 +50,9 @@ struct MQTTSubscription {
 
 /// internal struct for MQTT credentials.
 struct MQTTCredentials {
-  std::string address;  ///< The address of the server without port number
-  uint16_t port;        ///< The port number of the server.
+  optional<std::string> hostname;  ///< The address of the server without port number
+  optional<network::IPAddress> address;
+  uint16_t port;  ///< The port number of the server.
   std::string username;
   std::string password;
   std::string client_id;  ///< The client ID. Will automatically be truncated to 23 characters.
@@ -252,7 +254,8 @@ class MQTTClientComponent : public Component {
 
   void on_shutdown() override;
 
-  void set_broker_address(const std::string &address) { this->credentials_.address = address; }
+  void set_broker_hostname(const std::string &hostname) { this->credentials_.hostname = hostname; }
+  void set_broker_address(const network::IPAddress &address) { ; }
   void set_broker_port(uint16_t port) { this->credentials_.port = port; }
   void set_username(const std::string &username) { this->credentials_.username = username; }
   void set_password(const std::string &password) { this->credentials_.password = password; }

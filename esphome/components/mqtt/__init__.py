@@ -1,3 +1,5 @@
+import ipaddress
+
 from esphome import automation
 from esphome.automation import Condition
 import esphome.codegen as cg
@@ -6,6 +8,7 @@ from esphome.components.esp32 import (
     add_idf_sdkconfig_option,
     include_builtin_idf_component,
 )
+from esphome.components.network import IPAddress
 from esphome.config_helpers import filter_source_files_from_platform
 import esphome.config_validation as cv
 from esphome.const import (
@@ -355,8 +358,11 @@ async def to_code(config):
 
     cg.add_define("USE_MQTT")
     cg.add_global(mqtt_ns.using)
-
-    cg.add(var.set_broker_address(config[CONF_BROKER]))
+    try:
+        ip_obj = ipaddress.ip_address(config[CONF_BROKER])
+        cg.add(var.set_broker_address(IPAddress(str(ip_obj))))
+    except (ValueError, TypeError):
+        cg.add(var.set_broker_hostname(config[CONF_BROKER]))
     cg.add(var.set_enable_on_boot(config[CONF_ENABLE_ON_BOOT]))
     cg.add(var.set_broker_port(config[CONF_PORT]))
     cg.add(var.set_username(config[CONF_USERNAME]))
