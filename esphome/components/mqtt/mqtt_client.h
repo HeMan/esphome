@@ -255,7 +255,7 @@ class MQTTClientComponent : public Component {
   void on_shutdown() override;
 
   void set_broker_hostname(const std::string &hostname) { this->credentials_.hostname = hostname; }
-  void set_broker_address(const network::IPAddress &address) { ; }
+  void set_broker_address(const network::IPAddress &address) { this->credentials_.address = address; }
   void set_broker_port(uint16_t port) { this->credentials_.port = port; }
   void set_username(const std::string &username) { this->credentials_.username = username; }
   void set_password(const std::string &password) { this->credentials_.password = password; }

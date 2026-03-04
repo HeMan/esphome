@@ -188,7 +188,7 @@ void MQTTClientComponent::dump_config() {
                 "  Username: " LOG_SECRET("'%s'") "\n"
                 "  Client ID: " LOG_SECRET("'%s'") "\n"
                 "  Clean Session: %s",
-                this->ip_.str_to(ip_buf), this->credentials_.port,
+                this->credentials_.address.value().str_to(ip_buf), this->credentials_.port,
                 this->credentials_.username.c_str(), this->credentials_.client_id.c_str(),
                 YESNO(this->credentials_.clean_session));
   // clang-format on
@@ -215,7 +215,10 @@ bool MQTTClientComponent::can_proceed() {
 }
 
 void MQTTClientComponent::start_dnslookup_() {
-  if (!this->credentials_.address.has_value()) {
+  if (this->credentials_.address.has_value()) {
+    this->dns_resolved_ = true;
+    this->start_connect_();
+  } else {
     for (auto &subscription : this->subscriptions_) {
       subscription.subscribed = false;
       subscription.resubscribe_timeout = 0;
@@ -262,6 +265,10 @@ void MQTTClientComponent::start_dnslookup_() {
   }
 }
 void MQTTClientComponent::check_dnslookup_() {
+  if (this->credentials_.address.has_value()) {
+    this->dns_resolved_ = true;
+    return;
+  }
   if (!this->dns_resolved_ && millis() - this->connect_begin_ > 20000) {
     this->dns_resolve_error_ = true;
   }
