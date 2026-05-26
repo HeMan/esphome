@@ -11,8 +11,7 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
 
-namespace esphome {
-namespace lightwaverf {
+namespace esphome::lightwaverf {
 
 static const uint8_t TX_NIBBLE[] = {0xF6, 0xEE, 0xED, 0xEB, 0xDE, 0xDD, 0xDB, 0xBE,
                                     0xBD, 0xBB, 0xB7, 0x7E, 0x7D, 0x7B, 0x77, 0x6F};
@@ -192,7 +191,8 @@ void LwTx::lwtx_set_gap_multiplier(uint8_t gap_multiplier) { this->tx_gap_multip
 void LwTx::lw_timer_start() {
   {
     InterruptLock lock;
-    static LwTx *arg = this;  // NOLINT
+    static LwTx *arg;
+    arg = this;
     timer1_attachInterrupt([] { isr_t_xtimer(arg); });
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
     timer1_write(this->espPeriod);
@@ -207,6 +207,5 @@ void LwTx::lw_timer_stop() {
   }
 }
 
-}  // namespace lightwaverf
-}  // namespace esphome
+}  // namespace esphome::lightwaverf
 #endif

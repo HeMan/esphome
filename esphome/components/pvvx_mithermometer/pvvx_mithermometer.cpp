@@ -3,8 +3,7 @@
 
 #ifdef USE_ESP32
 
-namespace esphome {
-namespace pvvx_mithermometer {
+namespace esphome::pvvx_mithermometer {
 
 static const char *const TAG = "pvvx_mithermometer";
 
@@ -66,12 +65,11 @@ optional<ParseResult> PVVXMiThermometer::parse_header_(const esp32_ble_tracker::
     return {};
   }
 
-  static uint8_t last_frame_count = 0;
-  if (last_frame_count == raw[13]) {
-    ESP_LOGVV(TAG, "parse_header(): duplicate data packet received (%hhu).", last_frame_count);
+  if (this->last_frame_count_ == raw[13]) {
+    ESP_LOGVV(TAG, "parse_header(): duplicate data packet received (%hhu).", this->last_frame_count_);
     return {};
   }
-  last_frame_count = raw[13];
+  this->last_frame_count_ = raw[13];
 
   return result;
 }
@@ -141,7 +139,6 @@ bool PVVXMiThermometer::report_results_(const optional<ParseResult> &result, con
   return true;
 }
 
-}  // namespace pvvx_mithermometer
-}  // namespace esphome
+}  // namespace esphome::pvvx_mithermometer
 
 #endif
